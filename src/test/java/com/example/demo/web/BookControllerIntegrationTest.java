@@ -14,7 +14,6 @@ import com.example.demo.DemoApplication;
 import com.example.demo.config.SecurityConfig;
 import com.example.demo.persistence.model.Book;
 import com.example.demo.persistence.repo.BookRepository;
-import com.example.demo.web.BookController;
 
 import org.springframework.http.MediaType;
 
