@@ -2,7 +2,6 @@ package com.example.demo.service;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -48,25 +47,39 @@ public class BookService {
     @Async("serviceExecutor")
     @Transactional
     public CompletableFuture<Void> delete(Long id) {
-        return CompletableFuture.supplyAsync(() -> {
-            //will it be executed inside a transaction?
+        //return CompletableFuture.supplyAsync(() -> {
+            //will it be executed inside a transaction? NOPE
             bookRepository.findById(id)
                 .orElseThrow(BookNotFoundException::new);
             bookRepository.deleteById(id);
-            return null;
-        });
+            //return null;
+        //});
+
+        return CompletableFuture.completedFuture(null);
     }
 
     @Async("serviceExecutor")
     @Transactional
     public CompletableFuture<Book> updateBook(@Valid Book book, Long id) {
-        return CompletableFuture.supplyAsync(() -> {
+       //return CompletableFuture.supplyAsync(() -> {
             if (book.getId() != id) {
-                throw new BookIdMismatchException();
+                throw new BookIdMismatchException("Failed update, book id mismatch");
             }
-            bookRepository.findById(id)
+            Book existingBook = bookRepository.findById(id)
                 .orElseThrow(BookNotFoundException::new);
-            return bookRepository.save(book);
-        });
+
+            existingBook.setAuthor(book.getAuthor());
+            existingBook.setTitle(book.getTitle());
+            
+            Book updatedBook = bookRepository.save(existingBook);
+
+            if (book.getAuthor().equals("boom")) {
+                throw new BookIdMismatchException("Boom");
+            }
+
+            //return updatedBook;
+        //});
+
+        return CompletableFuture.completedFuture(updatedBook);
     }
 }
